@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "085a1f2b-339e-4ac4-81c2-b751e7d6fb4c",
+		"name": "Otus Social",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "5669768"
+	},
+	"item": [
+		{
+			"name": "Registry user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

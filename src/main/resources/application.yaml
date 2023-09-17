@@ -1,0 +1,8 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5454/social
+    username: crc
+    password: crc
+  flyway:
+    url: jdbc:postgresql://localhost:5454/social
+    locations: classpath:db/migration
