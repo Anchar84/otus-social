@@ -1,14 +1,21 @@
 package ru.otus.social.user.repository
 
 import io.r2dbc.spi.ConnectionFactory
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.reactivestreams.Publisher
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 import ru.otus.social.user.model.User
 import ru.otus.social.user.model.UserCredentials
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.Flow
+import java.util.function.Function
 
 @Repository
 class UserRepository(
@@ -95,6 +102,35 @@ class UserRepository(
                     passwdSalt = it.get("passwd_salt", String::class.java) ?: ""
                 )
             }.awaitFirstOrNull()
+        } finally {
+            connection.close().awaitFirstOrNull()
+        }
+    }
+
+    suspend fun searchUsersByNames(firstName: String, secondName: String): List<User> {
+        val connection = r2dbConnectionFactory.create().awaitSingle()
+        try {
+            val select = connection.createStatement("""
+                select id, first_name, second_name, age, birthdate, biography, city 
+                  from t_user 
+                  where first_name ilike $1 and second_name ilike $2""".trimIndent())
+            select.bind("$1", "$firstName%")
+            select.bind("$2", "$secondName%")
+
+
+            return select.execute().asFlow().flatMapConcat { result ->
+                result.map { it ->
+                    User(
+                        id = it.get("id", UUID::class.java),
+                        firstName = it.get("first_name", String::class.java) ?: "",
+                        secondName = it.get("second_name", String::class.java) ?: "",
+                        age = it.get("age", Integer::class.java)?.toInt() ?: 0,
+                        birthdate = it.get("birthdate", LocalDate::class.java),
+                        biography = it.get("biography", String::class.java) ?: "",
+                        city = it.get("city", String::class.java) ?: ""
+                    )
+                }.asFlow()
+            }.toList()
         } finally {
             connection.close().awaitFirstOrNull()
         }

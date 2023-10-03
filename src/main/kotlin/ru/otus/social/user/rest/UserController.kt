@@ -1,12 +1,10 @@
 package ru.otus.social.user.rest
 
+import org.springframework.data.repository.query.Param
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import ru.otus.social.user.model.User
-import ru.otus.social.user.rest.dto.Login
-import ru.otus.social.user.rest.dto.LoginResponse
-import ru.otus.social.user.rest.dto.Registration
-import ru.otus.social.user.rest.dto.UserId
+import ru.otus.social.user.rest.dto.*
 import ru.otus.social.user.service.UserService
 
 
@@ -51,5 +49,13 @@ class UserController(
         } else {
             ResponseEntity.notFound().build()
         }
+    }
+
+    @GetMapping("user/search")
+    suspend fun search(
+        @RequestParam("first_name") firstName: String,
+        @RequestParam("last_name") secondName: String,
+    ): ResponseEntity<List<SearchUser>> {
+        return ResponseEntity.ok(userService.searchUsersByNames(firstName, secondName).map { SearchUser(it.firstName) })
     }
 }

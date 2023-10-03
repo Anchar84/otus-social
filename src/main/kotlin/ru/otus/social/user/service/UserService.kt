@@ -1,15 +1,18 @@
 package ru.otus.social.user.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.otus.social.user.model.User
 import ru.otus.social.user.repository.UserRepository
 import ru.otus.social.user.utli.sha256
-import java.util.UUID
+import java.util.*
 
 @Service
-class UserService (
+class UserService(
     private val userRepository: UserRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(UserService::class.java)
 
     suspend fun registry(user: User, password: String): String {
         val passwordSalt = UUID.randomUUID().toString()
@@ -27,5 +30,11 @@ class UserService (
         } else {
             null
         }
+    }
+
+    suspend fun searchUsersByNames(firstName: String, secondName: String): List<User> {
+        val result = userRepository.searchUsersByNames(firstName, secondName)
+        logger.info("search user [$firstName], [$secondName], found ${result.size} records")
+        return result
     }
 }
