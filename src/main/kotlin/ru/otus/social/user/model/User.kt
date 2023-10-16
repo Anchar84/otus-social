@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.*
 
 data class User(
-    val id: UUID? = null,
+    val id: Int? = null,
     val firstName: String = "",
     val secondName: String = "",
     val age: Int = 0,

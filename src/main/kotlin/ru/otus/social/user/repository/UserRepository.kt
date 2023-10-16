@@ -22,7 +22,7 @@ class UserRepository(
     private val r2dbConnectionFactory: ConnectionFactory
 ) {
 
-    suspend fun createUser(user: User, passwordHash: String, passwordSalt: String): String {
+    suspend fun createUser(user: User, passwordHash: String, passwordSalt: String): Int {
         val connection = r2dbConnectionFactory.create().awaitSingle()
         try {
 //            connection.beginTransaction().awaitFirstOrNull()
@@ -44,7 +44,7 @@ class UserRepository(
             insertUser.bind("$6", user.city)
 
             val rs = insertUser.execute().awaitSingle()
-            val userId = rs.map { row -> row.get("id", String::class.java) }.awaitFirst()!!
+            val userId = rs.map { row -> row.get("id", Integer::class.java) }.awaitFirst()!!
 
             val insertUserCredentials = connection.createStatement(
                 """
@@ -52,27 +52,27 @@ class UserRepository(
                 values ($1, $2, $3)
             """.trimIndent()
             )
-            insertUserCredentials.bind("$1", UUID.fromString(userId))
+            insertUserCredentials.bind("$1", userId)
             insertUserCredentials.bind("$2", passwordHash)
             insertUserCredentials.bind("$3", passwordSalt)
             insertUserCredentials.returnGeneratedValues("user_id")
             insertUserCredentials.execute().awaitSingle().map { row -> row.get("user_id") }.awaitFirstOrNull()
 
-            return userId
+            return userId.toInt()
         } finally {
             connection.close().awaitFirstOrNull()
         }
     }
 
-    suspend fun getUserById(id: String): User? {
+    suspend fun getUserById(id: Int): User? {
         val connection = r2dbConnectionFactory.create().awaitSingle()
         try {
             val select = connection.createStatement("""
                 select first_name, second_name, age, birthdate, biography, city from t_user where id = $1""".trimIndent())
-            select.bind("$1", UUID.fromString(id))
+            select.bind("$1", id)
             return select.execute().awaitSingle().map { it ->
                 User(
-                    id = UUID.fromString(id),
+                    id = id,
                     firstName = it.get("first_name", String::class.java) ?: "",
                     secondName = it.get("second_name", String::class.java) ?: "",
                     age = it.get("age", Integer::class.java)?.toInt() ?: 0,
@@ -87,13 +87,13 @@ class UserRepository(
         }
     }
 
-    suspend fun getUserSaltAndPasswordHash(id: String): UserCredentials? {
+    suspend fun getUserSaltAndPasswordHash(id: Int): UserCredentials? {
         val connection = r2dbConnectionFactory.create().awaitSingle()
         try {
             val select = connection.createStatement("""
                 select passwd_hash, passwd_salt from t_user_credentials where user_id = $1
             """.trimIndent())
-            select.bind("$1", UUID.fromString(id))
+            select.bind("$1", id)
 
             return select.execute().awaitSingle().map { it ->
                 UserCredentials(
@@ -121,7 +121,7 @@ class UserRepository(
             return select.execute().asFlow().flatMapConcat { result ->
                 result.map { it ->
                     User(
-                        id = it.get("id", UUID::class.java),
+                        id = it.get("id", Integer::class.java)?.toInt(),
                         firstName = it.get("first_name", String::class.java) ?: "",
                         secondName = it.get("second_name", String::class.java) ?: "",
                         age = it.get("age", Integer::class.java)?.toInt() ?: 0,

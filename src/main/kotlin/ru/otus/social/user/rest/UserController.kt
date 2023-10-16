@@ -32,7 +32,7 @@ class UserController(
     }
 
     @GetMapping("user/get/{id}")
-    suspend fun getUserById(@PathVariable("id") id: String): ResponseEntity<User?> {
+    suspend fun getUserById(@PathVariable("id") id: Int): ResponseEntity<User?> {
         val user = userService.getUserById(id)
         return if (user != null) {
             ResponseEntity.ok(user)
@@ -57,5 +57,11 @@ class UserController(
         @RequestParam("last_name") secondName: String,
     ): ResponseEntity<List<SearchUser>> {
         return ResponseEntity.ok(userService.searchUsersByNames(firstName, secondName).map { SearchUser(it.firstName) })
+    }
+
+    @PostMapping("user/generate/{count}")
+    suspend fun generate(@PathVariable("count") count: Int): ResponseEntity<Unit> {
+        userService.generateUsers(count)
+        return ResponseEntity.ok(Unit)
     }
 }

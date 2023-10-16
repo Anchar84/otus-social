@@ -1,8 +1,11 @@
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:5454/social
-    username: crc
-    password: crc
+    url: r2dbc:postgresql://localhost:5432/social
+    username: postgres
+    password: pass
   flyway:
-    url: jdbc:postgresql://localhost:5454/social
+    url: jdbc:postgresql://localhost:5432/social
     locations: classpath:db/migration
+
+server:
+  port: 8081

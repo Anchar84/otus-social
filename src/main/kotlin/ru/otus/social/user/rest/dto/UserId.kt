@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class UserId(
     @get:JsonProperty("user_id")
-    val userId: String = ""
+    val userId: Int = 0
 )
