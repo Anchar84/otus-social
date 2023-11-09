@@ -24,7 +24,7 @@ services:
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 5s
-      timeout: 40s
+      timeout: 120s
     restart: unless-stopped
 
   broker:
@@ -35,7 +35,7 @@ services:
     healthcheck:
       test: [ "CMD", "rabbitmqctl", "status"]
       interval: 5s
-      timeout: 40s
+      timeout: 120s
     restart: unless-stopped
 
   posts-backend:
