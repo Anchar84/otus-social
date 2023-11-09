@@ -1,0 +1,83 @@
+version: '3.8'
+services:
+  service-db:
+    image: postgres:14.7-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "15454:5432"
+    volumes:
+      - ./infra/db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  cache-db:
+    image: redis:7.2.2-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 40s
+    restart: unless-stopped
+
+  broker:
+    image: rabbitmq:3.12.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 40s
+    restart: unless-stopped
+
+  posts-backend:
+    image: posts:0.0.1
+    build:
+      context: ./posts
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      broker:
+        condition: service_healthy
+      service-db:
+        condition: service_healthy
+      cache-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: service-db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      BROKER_HOST: broker
+      BROKER_PORT: 5672
+      BROKER_USER: guest
+      BROKER_PASSWORD: guest
+      REDIS_HOST: cache-db
+      REDIS_PORT: 6379
+
+
+  users-backend:
+    image: users:0.0.1
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - service-db
+    environment:
+      DB_HOST: service-db
+      DB_PORT: 15454
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+volumes:
+  db-data:
