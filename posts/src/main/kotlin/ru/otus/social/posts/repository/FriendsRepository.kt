@@ -2,18 +2,13 @@ package ru.otus.social.posts.repository
 
 import io.r2dbc.spi.ConnectionFactory
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Repository
 import ru.otus.social.posts.model.Friend
-import ru.otus.social.posts.model.Post
-import java.time.LocalDateTime
 
 @Repository
 class FriendsRepository(

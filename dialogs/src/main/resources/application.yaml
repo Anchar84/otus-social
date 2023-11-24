@@ -1,0 +1,11 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${CITUS_HOST}/
+    username: postgres
+    password: postgres
+  flyway:
+    url: jdbc:postgresql://${CITUS_HOST}/
+    locations: classpath:db/migration
+
+server:
+  port: 8083
