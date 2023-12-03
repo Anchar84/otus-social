@@ -26,3 +26,6 @@ destinations:
     OTUS_POSTS_UPDATE:
       exchange: POSTS_UPDATE
       routing-key: UPDATE
+    OTUS_SEND_POSTS_UPDATE:
+      exchange: SEND_POSTS_UPDATE
+      routing-key: UPDATE

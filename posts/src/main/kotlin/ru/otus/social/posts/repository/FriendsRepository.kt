@@ -26,8 +26,8 @@ class FriendsRepository(
                 values ($1, $2) on conflict do nothing
             """.trimIndent()
             ).returnGeneratedValues("friendId")
-            insertPost.bind("$1", friend.userId)
-            insertPost.bind("$2", friend.friendId)
+            insertPost.bind("$1",friend.friendId)
+            insertPost.bind("$2",friend.userId)
 
             insertPost.execute().awaitSingle().map { row -> row.get("friendId") }.awaitFirstOrNull()
         } finally {

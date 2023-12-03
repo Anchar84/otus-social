@@ -125,6 +125,21 @@ services:
     environment:
       CITUS_HOST: "${COMPOSE_PROJECT_NAME:-citus}-master"
 
+  websocket-backend:
+    image: 4programmers/websocket:0.0.1
+    build:
+      context: ./websocket
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      BROKER_HOST: broker
+      BROKER_PORT: 5672
+      BROKER_USER: guest
+      BROKER_PASSWORD: guest
 
 volumes:
   db-data:

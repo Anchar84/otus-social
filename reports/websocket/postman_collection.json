@@ -1,0 +1,244 @@
+{
+	"info": {
+		"_postman_id": "085a1f2b-339e-4ac4-81c2-b751e7d6fb4c",
+		"name": "Otus Social",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "5669768"
+	},
+	"item": [
+		{
+			"name": "Registry user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\": \"Петя\",\n    \"second_name\": \"Обормотов\",\n    \"age\": \"25\",\n    \"birthdate\": \"1998-11-01\",\n    \"biography\": \"\",\n    \"city\": \"\",\n    \"password\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8081/user/registry"
+			},
+			"response": []
+		},
+		{
+			"name": "Get user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"1\",\n    \"password\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8081/login"
+			},
+			"response": []
+		},
+		{
+			"name": "create post",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQntCx0L7RgNC80L7RgtC-0LIg0J_QtdGC0Y8iLCJ1c2VySWQiOjJ9.-3v8OBmQZwcQkmYjXX-8DmzO2YWewRo8l4HyHH7ucTc",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "Второй пост второго пользователя",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8082/post/create"
+			},
+			"response": []
+		},
+		{
+			"name": "add friend",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQntCx0L7RgNC80L7RgtC-0LIg0J_QtdGC0Y8iLCJ1c2VySWQiOjJ9.-3v8OBmQZwcQkmYjXX-8DmzO2YWewRo8l4HyHH7ucTc",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8082/friend/add/1"
+			},
+			"response": []
+		},
+		{
+			"name": "remove friend",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQn9C10YLRgNC-0LIg0JjQstCw0L0iLCJ1c2VySWQiOjJ9.ltOlyvxa0HL236R6Whg6mNX9UwPcQN1AnFQSU8Su5A8",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8082/friend/delete/1"
+			},
+			"response": []
+		},
+		{
+			"name": "update post",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "1",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQmtGD0LfQvdC10YbQvtCyINCh0LDRiNCwIiwidXNlcklkIjoyfQ.Wslum0v9g4pP7rrB5Qg5BJTx3fHr6Fbq8ewo3lsRoI8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"5\",\n    \"text\": \"Поправленный второй пост второго пользователя\"\n}"
+				},
+				"url": "http://localhost:8082/post/update"
+			},
+			"response": []
+		},
+		{
+			"name": "delete post",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "userId",
+						"value": "1",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiJTbWl0aCBKb24iLCJ1c2VySWQiOjF9.YeFkHCI8ZpMLE50CzKBjWpov3yVHtYIdIwCtYguq9K8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": "http://localhost:8082/post/delete/3"
+			},
+			"response": []
+		},
+		{
+			"name": "get post by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8082/post/get/1"
+			},
+			"response": []
+		},
+		{
+			"name": "get posts feed",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "2",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQmtGD0LfQvdC10YbQvtCyINCh0LDRiNCwIiwidXNlcklkIjoxfQ.6tnztiWKp2IVnRiRvgPOKTxUclLqXNXpB_1GcZLZjYA",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8082/post/feed"
+			},
+			"response": []
+		},
+		{
+			"name": "create dialog message",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiLQn9C10YLRgNC-0LIg0JjQstCw0L0iLCJ1c2VySWQiOjJ9.ltOlyvxa0HL236R6Whg6mNX9UwPcQN1AnFQSU8Su5A8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"Природа\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8083/dialog/1/send"
+			},
+			"response": []
+		},
+		{
+			"name": "dialog messages",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYSIsImlzcyI6Im90dXMtc29pY2FsLWhhIiwidXNlck5hbWUiOiJTbWl0aCBKb24iLCJ1c2VySWQiOjF9.YeFkHCI8ZpMLE50CzKBjWpov3yVHtYIdIwCtYguq9K8",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8083/dialog/2/list"
+			},
+			"response": []
+		}
+	]
+}

@@ -1,4 +1,4 @@
-package ru.otus.social.posts.config
+package ru.otus.social.websocket.config
 
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
@@ -7,8 +7,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
 import org.springframework.stereotype.Component
-import ru.otus.social.posts.config.DestinationsConfig.DestinationInfo
-
 
 @Component
 class RabbitConfiguration(
@@ -16,7 +14,7 @@ class RabbitConfiguration(
     private val amqpTemplate: AmqpTemplate,
     private val amqpAdmin: AmqpAdmin,
     private val destinationsConfig: DestinationsConfig
-    ) {
+) {
 
     private val logger = LoggerFactory.getLogger(RabbitConfiguration::class.java)
 
@@ -24,7 +22,7 @@ class RabbitConfiguration(
     fun setupQueueDestinations() {
         logger.info("Creating Destinations...")
         destinationsConfig.getQueues()
-            .forEach { (key: String, destination: DestinationInfo) ->
+            .forEach { (key: String, destination: DestinationsConfig.DestinationInfo) ->
                 logger.info(
                     "Creating directExchange: key={}, name={}, routingKey={}",
                     key,
@@ -57,10 +55,5 @@ class RabbitConfiguration(
         mlc.start()
 
         return mlc
-    }
-
-    fun sendMessage(query: String, payload: String) {
-        val destination = destinationsConfig.getQueues()[query] ?: return
-        amqpTemplate.convertAndSend(destination.exchange, destination.routingKey, payload)
     }
 }

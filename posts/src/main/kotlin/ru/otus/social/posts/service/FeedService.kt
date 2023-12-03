@@ -1,5 +1,6 @@
 package ru.otus.social.posts.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -8,10 +9,11 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.stereotype.Service
 import ru.otus.social.posts.config.RabbitConfiguration
+import ru.otus.social.posts.model.NewPostDto
+import ru.otus.social.posts.model.NewPostEvent
 import ru.otus.social.posts.model.Post
 import ru.otus.social.posts.model.UserPostsFeed
 import ru.otus.social.posts.repository.FriendsRepository
@@ -28,6 +30,8 @@ class FeedService(
 
     private val logger = LoggerFactory.getLogger(FeedService::class.java)
     private val queryName = "OTUS_POSTS_UPDATE"
+    private val newPostQueryName = "OTUS_SEND_POSTS_UPDATE"
+    private val mapper = ObjectMapper()
 
     @PostConstruct
     fun registryListeners() {
@@ -90,5 +94,14 @@ class FeedService(
         rabbitConfiguration.sendMessage(queryName, userId.toString())
     }
 
-
+    fun sendNewPostEvent(receiverId: Int, postId: Int, post: Post) {
+        rabbitConfiguration.sendMessage(newPostQueryName, mapper.writeValueAsString(NewPostEvent(
+            receiverId = receiverId,
+            post = NewPostDto(
+                id = postId,
+                authorUserId = post.authorId,
+                text = post.text
+            )
+        )))
+    }
 }

@@ -16,6 +16,7 @@ class PostService(
         val postId = postsRepository.createPost(post)
         friendsRepository.getAllFriends(post.authorId).collect {
             feedService.sendPostsFeedUpdate(it)
+            feedService.sendNewPostEvent(it, postId, post)
         }
         return postId
     }

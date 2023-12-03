@@ -1,0 +1,16 @@
+server:
+  port: 8084
+
+spring:
+  rabbitmq:
+    host: ${BROKER_HOST}
+    port: ${BROKER_PORT}
+    username: ${BROKER_USER}
+    password: ${BROKER_PASSWORD}
+
+
+destinations:
+  queues:
+    OTUS_SEND_POSTS_UPDATE:
+      exchange: SEND_POSTS_UPDATE
+      routing-key: UPDATE
