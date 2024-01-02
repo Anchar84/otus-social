@@ -1,0 +1,65 @@
+<mxfile host="Electron" modified="2024-01-02T16:15:58.828Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.15 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="PU9M-eK7M-f2sMDPfVpt" version="22.1.15" type="device">
+  <diagram name="Страница — 1" id="e16wO9Er7HGZLiA8miKT">
+    <mxGraphModel dx="1202" dy="811" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="N92Pb6g64dx1i0attuep-1" value="&lt;b&gt;Users&lt;/b&gt;&lt;br&gt;&lt;br&gt;Сервис пользователей, отвечает за операции:&lt;br&gt;- регистраиця&lt;br&gt;- авторизация&amp;nbsp;&lt;br&gt;&lt;br&gt;В результате авторизации возвращает jwt токен, который может быть использован для авторизации пользовательских REST запросов в другие модули" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="160" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-2" value="&lt;b&gt;Dialogs&lt;/b&gt;&lt;br&gt;&lt;br&gt;Сервис диалогов, отвечает за операции:&lt;br&gt;- отправки сообщения от одного пользователя другому&lt;br&gt;- получения сообщений диалога&lt;br&gt;&lt;br&gt;Хранение сообщений диалогов реализовано с помощью шардов (с помощью citus)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="340" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-3" value="&lt;b&gt;Posts&lt;/b&gt;&lt;br&gt;&lt;br&gt;Сервис постов, отвечает за операции:&lt;br&gt;- создания поста&lt;br&gt;- подписку одного пользователя на посты другого пользователя&lt;br&gt;- получение ленты постов&lt;br&gt;&lt;br&gt;Для ускорения получения ленты постов реализован кеш (используется Redis), в котором храниться готовая лента. Обновление ленты подписчиков осуществляется асинхронно через сообщения в брокере" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="300" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-4" value="&lt;b&gt;Websocket&lt;/b&gt;&lt;br&gt;&lt;br&gt;Сервис отвечает за операции за обновление ленты постов пользователя в realtime режиме.&lt;br&gt;&lt;br&gt;Новые сообщения ленты пользователя присылаются через брокер в сообщениях от сервиса posts" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="760" width="300" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=-0.034;exitY=0.736;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="N92Pb6g64dx1i0attuep-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-13" value="Обработка нового&lt;br&gt;сообщения в ленте&lt;br&gt;пользователя" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="N92Pb6g64dx1i0attuep-12">
+          <mxGeometry x="0.0792" y="-2" relative="1" as="geometry">
+            <mxPoint x="7" y="22" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-5" value="Брокер" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="520" width="120" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.132;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="N92Pb6g64dx1i0attuep-3" target="N92Pb6g64dx1i0attuep-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-7" value="Обновление ленты &lt;br&gt;пользователя" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="N92Pb6g64dx1i0attuep-6">
+          <mxGeometry x="-0.1063" y="-1" relative="1" as="geometry">
+            <mxPoint y="-21" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.237;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="N92Pb6g64dx1i0attuep-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="610" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-9" value="Новое сообщение&lt;br&gt;в ленте пользователя" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="N92Pb6g64dx1i0attuep-8">
+          <mxGeometry x="-0.0618" y="1" relative="1" as="geometry">
+            <mxPoint y="-19" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.997;entryY=0.644;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.01;exitY=0.357;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="N92Pb6g64dx1i0attuep-5" target="N92Pb6g64dx1i0attuep-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="N92Pb6g64dx1i0attuep-11" value="Обработка обновления&lt;br&gt;ленты пользователя" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="N92Pb6g64dx1i0attuep-10">
+          <mxGeometry x="0.0118" y="1" relative="1" as="geometry">
+            <mxPoint y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

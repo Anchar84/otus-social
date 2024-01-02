@@ -1,0 +1,66 @@
+asyncapi: 3.0.0
+info:
+  title: Social
+  version: 1.0.0
+  description: >-
+    Описание сообщений между сервисами социальной сети по ДЗ курса Otus Highload
+    Architect
+channels:
+  OTUS_POSTS_UPDATE:
+    address: OTUS_POSTS_UPDATE
+    messages:
+      subscribe.message:
+        $ref: '#/components/messages/UpdateFeedPosts'
+  OTUS_SEND_POSTS_UPDATE:
+    address: OTUS_SEND_POSTS_UPDATE
+    messages:
+      subscribe.message:
+        $ref: '#/components/messages/NewPost'
+operations:
+  OTUS_POSTS_UPDATE.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/OTUS_POSTS_UPDATE'
+    description: >-
+      Сообщение для обновления ленты постов. Сообщения отправляются всем
+      подписчикам пользователя, создавшего новое сообщение, из сервиса posts.
+      Обрабатывается этим же сервисом posts
+    messages:
+      - $ref: '#/channels/OTUS_POSTS_UPDATE/messages/subscribe.message'
+  OTUS_SEND_POSTS_UPDATE.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/OTUS_SEND_POSTS_UPDATE'
+    description: >-
+      Сообщение для обновление ленты постов пользователя через websocket. 
+      Отправляется сервисом posts, обрабатывается сервисом websocket
+    messages:
+      - $ref: '#/channels/OTUS_SEND_POSTS_UPDATE/messages/subscribe.message'
+components:
+  messages:
+    UpdateFeedPosts:
+      payload:
+        type: string
+        description: 'Идентификатор пользователя, у которого нужно обновить кеш ленты постов'
+    NewPost:
+      payload:
+        type: object
+        properties:
+          receiverId:
+            type: number
+            description: >-
+              Идентификатор пользователя, которому необходимо отправить новое
+              сообщение
+          post:
+            type: object
+            description: 'Сообщение, которое нужно отправить пользователю'
+            properties:
+              id:
+                type: number
+                description: Идентификатор сообщения
+              authorUserId:
+                type: number
+                description: Идентификатор автора сообщения
+              text:
+                type: string
+                description: Тест созданного поста
