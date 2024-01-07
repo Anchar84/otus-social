@@ -7,5 +7,16 @@ spring:
     url: jdbc:postgresql://${CITUS_HOST}/
     locations: classpath:db/migration
 
+
+
+tarantool:
+  host: ${TARANTOOL_HOST:localhost}
+  port: ${TARANTOOL_PORT:3301}
+  username: ${TARANTOOL_USERNAME:test}
+  password: ${TARANTOOL_PASSWORD:test}
+
+
+
 server:
   port: 8083
+

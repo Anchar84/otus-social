@@ -40,4 +40,30 @@ class DialogsController (
             )
         }
     }
+
+    @PostMapping("/{toUserId}/t/send")
+    suspend fun sendT(
+        @RequestHeader("X-Auth") token: String,
+        @PathVariable("toUserId") toUserId: Int,
+        @RequestBody text: MessageText
+    ) : ResponseEntity<Unit> {
+        val userIndo = Util.getUserInfo(token)
+        dialogsService.addMessageT(userIndo.userId, toUserId, text.text)
+        return ResponseEntity.ok(Unit)
+    }
+
+    @GetMapping("/{toUserId}/t/list")
+    fun listT(
+        @RequestHeader("X-Auth") token: String,
+        @PathVariable("toUserId") toUserId: Int,
+    ): List<DialogMessage> {
+        val userInfo = Util.getUserInfo(token)
+        return dialogsService.getMessagesT(userInfo.userId, toUserId).map {
+            DialogMessage (
+                from = it.fromUserId,
+                to = it.toUserId,
+                text = it.text
+            )
+        }
+    }
 }

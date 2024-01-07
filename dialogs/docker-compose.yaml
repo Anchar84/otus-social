@@ -34,6 +34,6 @@ services:
     environment: *AUTH
 volumes:
   healthcheck-volume:
-    name: "citus_healthcheck"
+    name: "citus_healthcheck_single"
   citus-master:
-    name: "citus-master"
+    name: "citus-master-single"
