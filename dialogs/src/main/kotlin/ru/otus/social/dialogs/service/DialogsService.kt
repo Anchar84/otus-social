@@ -1,18 +1,70 @@
 package ru.otus.social.dialogs.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
+import ru.otus.social.dialogs.config.RabbitConfiguration
+import ru.otus.social.dialogs.dto.ChangeEntityStatus
+import ru.otus.social.dialogs.http.RequestIdFilter
 import ru.otus.social.dialogs.model.Dialog
 import ru.otus.social.dialogs.repository.DialogsRepository
 
 @Service
 class DialogsService (
-    private val dialogsRepository: DialogsRepository
+    private val dialogsRepository: DialogsRepository,
+    private val rabbitConfiguration: RabbitConfiguration
 ) {
+    companion object {
+        private const val queryName = "OTUS_POSTS_COUNTER"
+        private val mapper = ObjectMapper()
+        private val logger = LoggerFactory.getLogger(DialogsService::class.java)
+    }
+
+    @PostConstruct
+    fun init() {
+        rabbitConfiguration.createMessageListenerContainer("OTUS_POSTS_COUNTER_APPROVE") {
+            val payload = String(it.body)
+            val changeEntityStatus = mapper.readValue(payload, ChangeEntityStatus::class.java)
+            MDC.put(RequestIdFilter.REQUEST_ID, changeEntityStatus.requestId)
+            logger.info("received message $payload")
+            MDC.clear()
+        }
+    }
+
+    fun markAsRead(userId: Int, messageId: Int) {
+        rabbitConfiguration.sendMessage(
+            queryName,
+            mapper.writeValueAsString(
+                ChangeEntityStatus(
+                    userId = userId.toString(),
+                    entityId = messageId.toString(),
+                    entityType = "message",
+                    action = "read"
+                )
+            )
+        )
+    }
 
     suspend fun addMessage(fromUserId: Int, toUserId: Int, text: String) {
-        dialogsRepository.createDialog(
-            Dialog(fromUserId, toUserId, text)
+        val id = dialogsRepository.createDialog(
+            Dialog(0, fromUserId, toUserId, text)
+        )
+        rabbitConfiguration.sendMessage(
+            queryName,
+            mapper.writeValueAsString(
+                ChangeEntityStatus(
+                    userId = toUserId.toString(),
+                    entityId = id.toString(),
+                    entityType = "message",
+                    action = "added"
+                )
+            )
         )
     }
 

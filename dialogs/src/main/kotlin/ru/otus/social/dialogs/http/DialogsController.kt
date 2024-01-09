@@ -18,6 +18,20 @@ class DialogsController(
     private val dialogsService: DialogsService
 ) {
 
+    @PostMapping("/{messageId}/read", headers = ["X-API-VERSION=1"])
+    suspend fun read(
+        @RequestHeader("X-Auth") token: String,
+        @PathVariable("messageId") messageId: Int,
+    ) {
+        coroutineScope {
+            withContext(MDCContext()) {
+                val userIndo = Util.getUserInfo(token)
+                dialogsService.markAsRead(userIndo.userId, messageId)
+                ResponseEntity.ok(Unit)
+            }
+        }
+    }
+
     @PostMapping("/{toUserId}/send", headers = ["X-API-VERSION=1"])
     suspend fun send(
         @RequestHeader("X-Auth") token: String,
@@ -41,6 +55,7 @@ class DialogsController(
         val userInfo = Util.getUserInfo(token)
         return dialogsService.getMessages(userInfo.userId, toUserId).map {
             DialogMessage(
+                id = it.id,
                 from = it.fromUserId,
                 to = it.toUserId,
                 text = it.text

@@ -1,14 +1,17 @@
-package ru.otus.social.dialogs
+package ru.otus.social.counter
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import ru.otus.social.dialogs.config.DestinationsConfig
+import ru.otus.social.counter.config.DestinationsConfig
+
+
+
 
 @EnableConfigurationProperties(DestinationsConfig::class)
 @SpringBootApplication
-class DialogsApplication
+class CounterApplication
 
 fun main(args: Array<String>) {
-    runApplication<DialogsApplication>(*args)
+	runApplication<CounterApplication>(*args)
 }

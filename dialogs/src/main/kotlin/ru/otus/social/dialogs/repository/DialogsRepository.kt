@@ -15,20 +15,20 @@ class DialogsRepository(
     private val connectionFactory: ConnectionFactory
 ) {
 
-    private val logger = LoggerFactory.getLogger(DialogsRepository::class.java)
-
-    suspend fun createDialog(dialog: Dialog) {
-        val insertRows = DatabaseClient.create(connectionFactory)
+    suspend fun createDialog(dialog: Dialog): Int {
+        val id = DatabaseClient.create(connectionFactory)
             .sql("insert into t_dialogs(fromUserId, toUserId, text, shadr_key) values (:1, :2, :3, :4)")
+            .filter{ s, next -> next.execute(s.returnGeneratedValues("id"))}
             .bind("1", dialog.fromUserId)
             .bind("2", dialog.toUserId)
             .bind("3", dialog.text)
             .bind("4", "${dialog.fromUserId}_${dialog.toUserId}")
             .fetch()
-            .rowsUpdated()
+            .first()
+            .map { r -> r["id"]?.toString()?.toInt() ?: 0 }
             .awaitSingle()
 
-        logger.info("added $insertRows dialogs")
+        return id
     }
 
     fun getDialogs(user1Id: Int, user2Id: Int): Flow<Dialog> {
@@ -40,6 +40,7 @@ class DialogsRepository(
             .bind("2", "${user2Id}_$user1Id")
             .map { it ->
                 Dialog(
+                    id = it.get("id", Integer::class.java)?.toInt() ?: 0,
                     fromUserId = it.get("fromUserId", Integer::class.java)?.toInt() ?: 0,
                     toUserId = it.get("toUserId", Integer::class.java)?.toInt() ?: 0,
                     text = it.get("text", String::class.java) ?: ""
