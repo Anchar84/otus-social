@@ -1,0 +1,20 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5454/social_counter
+    username: crc
+    password: crc
+  flyway:
+    url: jdbc:postgresql://localhost:5454/social_counter
+    locations: classpath:db/migration
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+destinations:
+  queues:
+    OTUS_POSTS_COUNTER:
+      exchange: POSTS_COUNTER
+      routing-key: UPDATE

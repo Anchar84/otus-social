@@ -122,8 +122,32 @@ services:
         condition: service_healthy
       manager:
         condition: service_healthy
+      broker:
+        condition: service_healthy
     environment:
       CITUS_HOST: "${COMPOSE_PROJECT_NAME:-citus}-master"
+
+  counter-backend:
+    image: counter:0.0.1
+    build:
+      context: ./counter
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      service-db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    environment:
+      DB_HOST: service-db
+      DB_PORT: 15454
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      BROKER_HOST: broker
+      BROKER_PORT: 5672
+      BROKER_USER: guest
+      BROKER_PASSWORD: guest
 
   websocket-backend:
     image: 4programmers/websocket:0.0.1

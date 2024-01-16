@@ -42,7 +42,7 @@ class PostService(
     }
 
     suspend fun getPost(id: Int): Post? {
-       return postsRepository.getPost(id)
+        return postsRepository.getPost(id)
     }
 
 
