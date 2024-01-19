@@ -7,15 +7,17 @@ spring:
     url: jdbc:postgresql://${CITUS_HOST}/
     locations: classpath:db/migration
 
-
+  rabbitmq:
+    host: ${BROKER_HOST}
+    port: ${BROKER_PORT}
+    username: ${BROKER_USER}
+    password: ${BROKER_PASSWORD}
 
 tarantool:
   host: ${TARANTOOL_HOST:localhost}
   port: ${TARANTOOL_PORT:3301}
   username: ${TARANTOOL_USERNAME:test}
   password: ${TARANTOOL_PASSWORD:test}
-
-
 
 server:
   port: 8083

@@ -2,6 +2,7 @@ FROM gradle:8.3.0-jdk17
 
 WORKDIR /app
 COPY . /app/.
+RUN rm -rf /app/build
 
 RUN cd /app && chmod +x ./gradlew && ./gradlew build
 RUN cp ./build/libs/*.jar ./app.jar

@@ -40,6 +40,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
 
+    implementation("io.tarantool:cartridge-driver:0.13.0")
     implementation("io.tarantool:spring-data-tarantool:0.6.1")
 
 //    implementation("io.tarantool:cartridge-driver:0.13.0")

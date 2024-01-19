@@ -1,7 +1,6 @@
 package ru.otus.social.dialogs.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -17,6 +16,7 @@ import ru.otus.social.dialogs.repository.DialogsRepository
 import ru.otus.social.dialogs.repository.TarantoolDialogsRepository
 import ru.otus.social.dialogs.repository.toDialog
 import java.time.ZonedDateTime
+import javax.annotation.PostConstruct
 
 @Service
 class DialogsService (

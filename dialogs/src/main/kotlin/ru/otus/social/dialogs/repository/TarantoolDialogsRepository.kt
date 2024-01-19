@@ -1,53 +1,76 @@
 package ru.otus.social.dialogs.repository
 
-import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.TarantoolClient
+import io.tarantool.driver.api.TarantoolClientFactory
 import io.tarantool.driver.api.TarantoolResult
-import io.tarantool.driver.api.space.TarantoolSpaceOperations
-import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory
 import io.tarantool.driver.api.tuple.TarantoolTuple
 import org.springframework.data.annotation.Id
 import org.springframework.data.tarantool.core.mapping.Field
 import org.springframework.data.tarantool.core.mapping.Tuple
-import org.springframework.data.tarantool.repository.Query
-import org.springframework.data.tarantool.repository.TarantoolRepository
-import org.springframework.data.tarantool.repository.TarantoolSerializationType
 import org.springframework.stereotype.Repository
+import ru.otus.social.dialogs.TarantoolConfigProps
 import ru.otus.social.dialogs.model.Dialog
 import java.time.Instant
 import java.util.*
 
 
 @Repository
-interface TarantoolDialogsRepository: TarantoolRepository<TarantoolDialogDTO, Int> {
+class TarantoolDialogsRepository(
+    private val tarantoolProps: TarantoolConfigProps
+) {
 
-    companion object {
-        private const val ns = "dialogs"
+    fun setupClient(): TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+        return TarantoolClientFactory.createClient()
+            .withAddress(
+                tarantoolProps.getHost(),
+                tarantoolProps.getPort()
+            )
+            .withCredentials(tarantoolProps.getUsername(), tarantoolProps.getPassword())
+            .build()
     }
 
-    @Query(function = "find_dialod_messages", output = TarantoolSerializationType.TUPLE)
-    fun loadMessages(fromUserId: Int, toUserId: Int): List<TarantoolDialogDTO>
-//    {
-//        val space: TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> = tarantoolClient.space(ns)
-//
-//        val tuples = space.select(Conditions.any()).get()
-//        println(tuples.size)
-//
-//        return emptyList()
-//    }
+    private fun map(tuple: List<Object>): TarantoolDialogDTO {
+        return TarantoolDialogDTO(
+            id = tuple[0] as Int,
+            fromUserId = tuple[1] as Int,
+            toUserId = tuple[2] as Int,
+            text = tuple[3] as String,
+            createdAt = Instant.ofEpochSecond((tuple[4] as Int).toLong())
+        )
+    }
 
-    @Query(function = "add_dialod_messages", output = TarantoolSerializationType.TUPLE)
-    fun saveMessage(fromUserId: Int, toUserId: Int, test: String, createdAt: Instant)
-//    {
-//        val space: TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> = tarantoolClient.space(ns)
-//
-//        // Use TarantoolTupleFactory for instantiating new tuples
-//        val tupleFactory = DefaultTarantoolTupleFactory(
-//            tarantoolClient.config.messagePackMapper
-//        )
-//        space.insertMany(listOf(tupleFactory.create(null, fromUserId, toUserId, test, createdAt))).get()
-//    }
+    fun loadMessages(fromUserId: Int, toUserId: Int): List<TarantoolDialogDTO> {
+        return setupClient().use { client ->
+            try {
+                return (client.call(
+                    "find_dialod_messages",
+                    fromUserId,
+                    toUserId
+                ).get() as (List<List<List<Object>>>))[0]
+                    .map { map(it) } +
+                      (client.call(
+                    "find_dialod_messages",
+                    toUserId,
+                    fromUserId
+                ).get() as (List<List<List<Object>>>))[0]
+                    .map { map(it) }
+                          .sortedBy { it.createdAt }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            emptyList()
+        }
+    }
 
+    fun saveMessage(fromUserId: Int, toUserId: Int, text: String, createdAt: Instant) {
+        setupClient().use { client ->
+            try {
+                client.call("add_dialod_messages", fromUserId, toUserId, text, createdAt.epochSecond).get()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }
 
 @Tuple("dialogs")
@@ -67,6 +90,7 @@ data class TarantoolDialogDTO(
 
 fun toDialog(dialog: TarantoolDialogDTO): Dialog {
     return Dialog(
+        id = dialog.id ?: 0,
         fromUserId = dialog.fromUserId,
         toUserId = dialog.toUserId,
         text = dialog.text

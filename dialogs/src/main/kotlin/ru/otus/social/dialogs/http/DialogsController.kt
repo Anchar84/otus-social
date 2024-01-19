@@ -84,7 +84,8 @@ class DialogsController(
             DialogMessage (
                 from = it.fromUserId,
                 to = it.toUserId,
-                text = it.text
+                text = it.text,
+                id = it.id
             )
         }
     }

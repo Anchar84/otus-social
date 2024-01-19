@@ -27,6 +27,18 @@ services:
       timeout: 120s
     restart: unless-stopped
 
+  tarantool:
+    image: tarantool/tarantool:latest
+    command: tarantool /tarantul_init.lua
+    ports:
+      - "3301:3301"
+    environment:
+      TARANTOOL_USER_NAME: test
+      TARANTOOL_USER_PASSWORD: test
+    volumes:
+      - ./infra/db/tarantul_init.lua:/tarantul_init.lua
+    restart: unless-stopped
+
   broker:
     image: rabbitmq:3.12.8-management
     ports:
@@ -124,8 +136,19 @@ services:
         condition: service_healthy
       broker:
         condition: service_healthy
+      tarantool:
+        condition: service_healthy
     environment:
       CITUS_HOST: "${COMPOSE_PROJECT_NAME:-citus}-master"
+      TARANTOOL_HOST: "tarantool"
+      TARANTOOL_PORT: 3301
+      TARANTOOL_USERNAME: "test"
+      TARANTOOL_PASSWORD: "test"
+      BROKER_HOST: broker
+      BROKER_PORT: 5672
+      BROKER_USER: guest
+      BROKER_PASSWORD: guest
+
 
   counter-backend:
     image: counter:0.0.1

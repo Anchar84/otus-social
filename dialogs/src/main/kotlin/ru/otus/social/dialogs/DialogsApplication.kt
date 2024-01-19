@@ -6,8 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import ru.otus.social.dialogs.config.DestinationsConfig
 
-@EnableConfigurationProperties(DestinationsConfig::class)
-
+@EnableConfigurationProperties(DestinationsConfig::class, TarantoolConfigProps::class)
 @ConfigurationPropertiesScan
 @SpringBootApplication
 class DialogsApplication

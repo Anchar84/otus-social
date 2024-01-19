@@ -1,12 +1,12 @@
 package ru.otus.social.dialogs.config
 
-import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.*
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 
 @Component
 class RabbitConfiguration

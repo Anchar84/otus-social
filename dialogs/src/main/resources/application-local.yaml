@@ -6,9 +6,18 @@ spring:
   flyway:
     url: jdbc:postgresql://localhost:5432/
     locations: classpath:db/migration
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
 logging:
   level:
     root: INFO
+
 
 server:
   port: 8083
