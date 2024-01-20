@@ -29,14 +29,14 @@ services:
 
   tarantool:
     image: tarantool/tarantool:latest
-    command: tarantool /tarantul_init.lua
+    command: tarantool /tarantool_init.lua
     ports:
       - "3301:3301"
     environment:
       TARANTOOL_USER_NAME: test
       TARANTOOL_USER_PASSWORD: test
     volumes:
-      - ./infra/db/tarantul_init.lua:/tarantul_init.lua
+      - ./infra/db/tarantool_init.lua:/tarantool_init.lua
     restart: unless-stopped
 
   broker:

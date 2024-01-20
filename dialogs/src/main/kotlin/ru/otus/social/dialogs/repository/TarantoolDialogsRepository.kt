@@ -12,6 +12,7 @@ import ru.otus.social.dialogs.TarantoolConfigProps
 import ru.otus.social.dialogs.model.Dialog
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 
 @Repository
@@ -19,7 +20,11 @@ class TarantoolDialogsRepository(
     private val tarantoolProps: TarantoolConfigProps
 ) {
 
+    private val pool = mutableListOf<Connection>()
+
     fun setupClient(): TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+
+
         return TarantoolClientFactory.createClient()
             .withAddress(
                 tarantoolProps.getHost(),
@@ -27,6 +32,23 @@ class TarantoolDialogsRepository(
             )
             .withCredentials(tarantoolProps.getUsername(), tarantoolProps.getPassword())
             .build()
+    }
+
+    @Synchronized fun getConnection(): Connection? {
+        if (pool.isEmpty()) {
+            (1..30).forEach { pool.add(Connection(it, setupClient())) }
+        }
+        var connection: Connection? = null
+        while (connection == null) {
+            connection = pool.firstOrNull { it.available }
+            if (connection == null) {
+                Thread.sleep(300)
+            } else {
+                connection.available = false
+                return connection
+            }
+        }
+        return null
     }
 
     private fun map(tuple: List<Object>): TarantoolDialogDTO {
@@ -40,38 +62,48 @@ class TarantoolDialogsRepository(
     }
 
     fun loadMessages(fromUserId: Int, toUserId: Int): List<TarantoolDialogDTO> {
-        return setupClient().use { client ->
-            try {
-                return (client.call(
-                    "find_dialod_messages",
-                    fromUserId,
-                    toUserId
-                ).get() as (List<List<List<Object>>>))[0]
-                    .map { map(it) } +
-                      (client.call(
-                    "find_dialod_messages",
-                    toUserId,
-                    fromUserId
-                ).get() as (List<List<List<Object>>>))[0]
-                    .map { map(it) }
-                          .sortedBy { it.createdAt }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        val connection = getConnection() ?: return emptyList()
+        return try {
+            (connection.client.call(
+                "find_dialod_messages",
+                fromUserId,
+                toUserId
+            ).get() as (List<List<List<Object>>>))[0]
+                .map { map(it) } +
+                    (connection.client.call(
+                        "find_dialod_messages",
+                        toUserId,
+                        fromUserId
+                    ).get() as (List<List<List<Object>>>))[0]
+                        .map { map(it) }
+                        .sortedBy { it.createdAt }
+        } catch (e: Exception) {
+            e.printStackTrace()
             emptyList()
+        } finally {
+            connection.available = true
         }
+
     }
 
     fun saveMessage(fromUserId: Int, toUserId: Int, text: String, createdAt: Instant) {
-        setupClient().use { client ->
-            try {
-                client.call("add_dialod_messages", fromUserId, toUserId, text, createdAt.epochSecond).get()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        val connection = getConnection() ?: return
+        try {
+            connection.client.call("add_dialod_messages", fromUserId, toUserId, text, createdAt.epochSecond).get()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            connection.available = true
         }
+
     }
 }
+
+class Connection (
+    var inx: Int,
+    val client: TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>,
+    var available: Boolean = true
+)
 
 @Tuple("dialogs")
 data class TarantoolDialogDTO(
