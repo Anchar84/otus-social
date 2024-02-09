@@ -1,0 +1,110 @@
+version: '3.8'
+services:
+  service-db:
+    image: postgres:14-alpine
+    user: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: 'pg_isready -U postgres --dbname=postgres'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "15454:5432"
+    command: |
+        postgres
+        -c wal_level=replica
+        -c ssl=off
+        -c hot_standby=on
+        -c max_wal_senders=10
+        -c max_replication_slots=10
+        -c hot_standby_feedback=on
+        -c hba_file=/master_pg_hda.conf
+#    command: bash /start_master.sh
+    volumes:
+      - ./infra/db/create_db_replica.sql:/docker-entrypoint-initdb.d/create_db_replica.sql
+      - ./infra/db/master_pg_hda.conf:/master_pg_hda.conf
+      - ./infra/db/master_init.sql:/master_init.sql
+      - ./infra/db/master_init.sh:/docker-entrypoint-initdb.d/master_init.sh
+#      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  service-db-replica:
+    image: postgres:14-alpine
+    user: postgres
+    ports:
+      - "15455:5432"
+    environment:
+      PGUSER: replicator
+      PGPASSWORD: replicator_password
+    healthcheck:
+      test: 'pg_isready -U postgres --dbname=postgres'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./infra/db/replica_config.sh:/replica_config.sh
+    command: bash /replica_config.sh
+    depends_on:
+      - service-db
+
+  haproxy-lb:
+    image: haproxy:2.4
+    container_name: haproxy-lb
+    restart: "no"
+    volumes:
+      - "./infra/balance/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    ports:
+      - "5002:5002"
+      - "7002:7002"
+    depends_on:
+      - service-db
+      - service-db-replica
+
+  users-backend-1:
+    image: users-r:0.0.1
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    depends_on:
+      - haproxy-lb
+    environment:
+      DB_HOST: haproxy-lb
+      DB_PORT: 5002
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      FW_MIGRATE: false
+
+
+  users-backend-2:
+    image: users-r:0.0.1
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    depends_on:
+      - haproxy-lb
+    environment:
+      DB_HOST: haproxy-lb
+      DB_PORT: 5002
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      FW_MIGRATE: false
+
+  nginx-lb:
+    image: nginx:1.21
+    container_name: nginx-lb
+    restart: on-failure
+    volumes:
+      - ./infra/balance/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - users-backend-1
+      - users-backend-2
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
+    name: "db-data-replica"

@@ -1,11 +1,12 @@
 spring:
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST}/social_users
+    url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/social_users
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   flyway:
-    url: jdbc:postgresql://${DB_HOST}/social_users
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/social_users
     locations: classpath:db/migration
+    enabled: ${FW_MIGRATE:true}
 
 server:
   port: 8081
